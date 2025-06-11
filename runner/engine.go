@@ -247,6 +247,11 @@ func (e *Engine) watchPath(path string) error {
 				return
 			case ev := <-e.watcher.Events():
 				e.mainDebug("event: %+v", ev)
+				if removeFileEvent(ev) {
+					e.watcherDebug("%s has changed", e.config.rel(ev.Name))
+					e.eventCh <- ev.Name
+					continue
+				}
 				if !validEvent(ev) {
 					break
 				}
@@ -264,6 +269,7 @@ func (e *Engine) watchPath(path string) error {
 				if !e.isIncludeExt(ev.Name) && !e.checkIncludeFile(ev.Name) {
 					break
 				}
+
 				e.watcherDebug("%s has changed", e.config.rel(ev.Name))
 				e.eventCh <- ev.Name
 			case err := <-e.watcher.Errors():

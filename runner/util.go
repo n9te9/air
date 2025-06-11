@@ -244,6 +244,15 @@ func removeEvent(ev fsnotify.Event) bool {
 	return ev.Op&fsnotify.Remove == fsnotify.Remove
 }
 
+func removeFileEvent(ev fsnotify.Event) bool {
+	_, err := os.Stat(ev.Name)
+	if os.IsNotExist(err) {
+		return ev.Op&fsnotify.Remove == fsnotify.Remove || ev.Op&fsnotify.Rename == fsnotify.Rename
+	}
+
+	return false
+}
+
 func cmdPath(path string) string {
 	return strings.Split(path, " ")[0]
 }
